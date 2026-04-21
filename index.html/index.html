@@ -6,47 +6,82 @@
 
 <style>
 body {
-    font-family: Arial;
-    background: #f4f4f4;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #d9f2ff, #ffffff);
     padding: 20px;
+    margin: 0;
+}
+
+.container {
+    max-width: 450px;
+    margin: auto;
+}
+
+h2 {
+    text-align: center;
+    color: #0077b6;
 }
 
 .card {
     background: white;
+    border: 2px solid #90e0ef;
+    border-radius: 15px;
     padding: 15px;
-    border-radius: 10px;
-    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 input, select {
-    padding: 8px;
-    margin: 5px 0;
     width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
 button {
-    padding: 8px;
     width: 100%;
-    margin-top: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    background: #00b4d8;
+    color: white;
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
 }
 
-li {
+button:hover {
+    background: #0096c7;
+}
+
+.search {
     margin-top: 10px;
-    padding: 8px;
-    background: #eee;
-    border-radius: 6px;
+}
+
+li {
+    background: #f0fbff;
+    border: 1px solid #90e0ef;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+small {
+    display: block;
+    color: gray;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="container">
 
 <h2>📝 Mis Notas Pro</h2>
+
+<div class="card">
 
 <input id="noteInput" placeholder="Escribe una nota..." />
 
@@ -57,9 +92,13 @@ li {
     <option>Personal</option>
 </select>
 
-<button onclick="addNote()">Agregar</button>
+<button onclick="addNote()">Agregar Nota</button>
+
+<input class="search" id="search" placeholder="Buscar nota..." onkeyup="renderNotes()" />
 
 <ul id="notesList"></ul>
+
+</div>
 
 </div>
 
@@ -68,13 +107,20 @@ let notes = JSON.parse(localStorage.getItem("notes")) || [];
 
 function renderNotes() {
     const list = document.getElementById("notesList");
+    const search = document.getElementById("search").value.toLowerCase();
+
     list.innerHTML = "";
 
-    notes.forEach((note, i) => {
+    notes
+    .filter(n => n.text.toLowerCase().includes(search))
+    .forEach((note, i) => {
         list.innerHTML += `
             <li>
-                <span>[${note.category}] ${note.text}</span>
-                <button onclick="deleteNote(${i})">X</button>
+                <div>
+                    <b>[${note.category}]</b>
+                    <small>${note.text}</small>
+                </div>
+                <button onclick="deleteNote(${i})">❌</button>
             </li>
         `;
     });
@@ -97,6 +143,13 @@ function deleteNote(i) {
     notes.splice(i, 1);
     renderNotes();
 }
+
+// 🔥 ENTER para agregar nota
+document.getElementById("noteInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        addNote();
+    }
+});
 
 renderNotes();
 </script>
