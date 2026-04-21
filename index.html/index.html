@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mi Task Pro</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+h1 { padding: 20px; }
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 10px;
+}
+
+input, select {
+    width: 70%;
+    padding: 12px;
+    margin: 5px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+
+button {
+    padding: 10px 12px;
+    margin: 5px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add { background:#00c853; color:white; }
+.clear { background:#ff1744; color:white; }
+
+ul { list-style:none; padding:0; }
+
+li {
+    background: rgba(255,255,255,0.15);
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.done { background:#2979ff; color:white; }
+.delete { background:#ff5252; color:white; }
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+b { color:#ffd54f; }
+</style>
+
+</head>
+
+<body>
+
+<h1>📋 Mi Task Pro</h1>
+
+<div class="container">
+
+<input id="tarea" placeholder="Escribe una tarea">
+
+<select id="categoria">
+  <option value="Trabajo">💼 Trabajo</option>
+  <option value="Estudio">📚 Estudio</option>
+  <option value="Universidad">🎓 Universidad</option>
+  <option value="Tecnico">🔧 Técnico</option>
+</select>
+
+<button class="add" onclick="agregar()">Agregar</button>
+<button class="clear" onclick="limpiar()">Limpiar todo</button>
+
+<ul id="lista"></ul>
+
+</div>
+
+<script>
+function getTasks() {
+    return JSON.parse(localStorage.getItem("tareas")) || [];
+}
+
+function saveTasks(tareas) {
+    localStorage.setItem("tareas", JSON.stringify(tareas));
+}
+
+function agregar() {
+    let input = document.getElementById("tarea");
+    let categoria = document.getElementById("categoria").value;
+
+    let texto = input.value.trim();
+    if (texto === "") return;
+
+    let tareas = getTasks();
+
+    tareas.push({
+        texto: texto,
+        categoria: categoria,
+        done: false
+    });
+
+    saveTasks(tareas);
+    input.value = "";
+    mostrar();
+}
+
+function mostrar() {
+    let lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    let tareas = getTasks();
+
+    tareas.forEach((t, i) => {
+        let li = document.createElement("li");
+
+        if (t.done) li.classList.add("completed");
+
+        li.innerHTML = `
+            <span><b>[${t.categoria}]</b> ${t.texto}</span>
+            <div>
+                <button class="done" onclick="completar(${i})">✔</button>
+                <button class="delete" onclick="eliminar(${i})">X</button>
+            </div>
+        `;
+
+        lista.appendChild(li);
+    });
+}
+
+function completar(i) {
+    let tareas = getTasks();
+    tareas[i].done = !tareas[i].done;
+    saveTasks(tareas);
+    mostrar();
+}
+
+function eliminar(i) {
+    let tareas = getTasks();
+    tareas.splice(i, 1);
+    saveTasks(tareas);
+    mostrar();
+}
+
+function limpiar() {
+    localStorage.clear();
+    mostrar();
+}
+
+mostrar();
+</script>
+
+<!-- SERVICE WORKER -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
