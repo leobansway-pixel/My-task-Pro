@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿[5:21 pm, 21/4/2026] L: <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -156,3 +156,151 @@ renderNotes();
 
 </body>
 </html>
+[5:54 pm, 21/4/2026] L: <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>MyTaskPro</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg, #d9f2ff, #ffffff);
+    padding: 20px;
+}
+
+.container {
+    max-width: 450px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    border: 2px solid #90e0ef;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    text-align: center;
+    color: #0077b6;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: #00b4d8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0096c7;
+}
+
+li {
+    background: #f0fbff;
+    border: 1px solid #90e0ef;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📝 MyTaskPro</h2>
+
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+    <h3>Login</h3>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Contraseña">
+
+    <button onclick="register()">Registrarse</button>
+    <button onclick="login()">Entrar</button>
+    <button onclick="logout()">Salir</button>
+</div>
+
+<!-- NOTAS -->
+<div class="card" id="appBox" style="display:none;">
+
+    <input id="noteInput" placeholder="Escribe una nota..." />
+
+    <select id="category">
+        <option>General</option>
+        <option>Trabajo</option>
+        <option>Estudio</option>
+        <option>Personal</option>
+    </select>
+
+    <button onclick="addNote()">Agregar</button>
+
+    <input id="search" placeholder="Buscar..." onkeyup="renderNotes()" />
+
+    <ul id="notesList"></ul>
+
+</div>
+
+</div>
+
+<script>
+/* 🔥 TU FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyDKQ67lAq1Sswlc0SDTsEUMZkVFESTlhg8",
+  authDomain: "mytaskpro-a6655.firebaseapp.com",
+  projectId: "mytaskpro-a6655",
+  storageBucket: "mytaskpro-a6655.firebasestorage.app",
+  messagingSenderId: "87448336295",
+  appId: "1:87448336295:web:a83d96ac5ea21a9a49a882"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+/* 🔐 LOGIN */
+function register() {
+    auth.createUserWithEmailAndPassword(email.value, password.value)
+    .then(() => alert("Usuario creado"))
+    .catch(e => alert(e.message));
+}
+
+function login() {
+    auth.signInWithEmailAndPassword(email.value, password.value)
+    .then(() => alert("Bienvenido"))
+    .catch(e => alert(e.message));
+}
+
+function logout() {
+    auth.signOut();
+}
+
+/* mostrar u ocultar app */
+auth.onAuthStateChanged(user => {
+    if (user) {
+        loginBox.style.display = "none";
+        appBox.style.display = "block";
+    } else {
+        loginBox.style.display = "block";
+        app
