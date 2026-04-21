@@ -1,15 +1,19 @@
 ﻿{
-  "name": "Mi Task Pro",
-  "short_name": "Tasks",
-  "start_url": "index.html",
+  "name": "MyTaskPro",
+  "short_name": "TaskPro",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1f1c2c",
-  "theme_color": "#1f1c2c",
-  "description": "App de tareas con categorías",
+  "background_color": "#ffffff",
+  "theme_color": "#0096c7",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
