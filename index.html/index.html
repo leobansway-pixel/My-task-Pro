@@ -1,189 +1,31 @@
-﻿[5:21 pm, 21/4/2026] L: <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Mis Notas Pro</title>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #d9f2ff, #ffffff);
-    padding: 20px;
-    margin: 0;
-}
-
-.container {
-    max-width: 450px;
-    margin: auto;
-}
-
-h2 {
-    text-align: center;
-    color: #0077b6;
-}
-
-.card {
-    background: white;
-    border: 2px solid #90e0ef;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-input, select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    background: #00b4d8;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #0096c7;
-}
-
-.search {
-    margin-top: 10px;
-}
-
-li {
-    background: #f0fbff;
-    border: 1px solid #90e0ef;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-small {
-    display: block;
-    color: gray;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>📝 Mis Notas Pro</h2>
-
-<div class="card">
-
-<input id="noteInput" placeholder="Escribe una nota..." />
-
-<select id="category">
-    <option>General</option>
-    <option>Trabajo</option>
-    <option>Estudio</option>
-    <option>Personal</option>
-</select>
-
-<button onclick="addNote()">Agregar Nota</button>
-
-<input class="search" id="search" placeholder="Buscar nota..." onkeyup="renderNotes()" />
-
-<ul id="notesList"></ul>
-
-</div>
-
-</div>
-
-<script>
-let notes = JSON.parse(localStorage.getItem("notes")) || [];
-
-function renderNotes() {
-    const list = document.getElementById("notesList");
-    const search = document.getElementById("search").value.toLowerCase();
-
-    list.innerHTML = "";
-
-    notes
-    .filter(n => n.text.toLowerCase().includes(search))
-    .forEach((note, i) => {
-        list.innerHTML += `
-            <li>
-                <div>
-                    <b>[${note.category}]</b>
-                    <small>${note.text}</small>
-                </div>
-                <button onclick="deleteNote(${i})">❌</button>
-            </li>
-        `;
-    });
-
-    localStorage.setItem("notes", JSON.stringify(notes));
-}
-
-function addNote() {
-    let text = document.getElementById("noteInput").value;
-    let category = document.getElementById("category").value;
-
-    if (text.trim() !== "") {
-        notes.push({ text, category });
-        document.getElementById("noteInput").value = "";
-        renderNotes();
-    }
-}
-
-function deleteNote(i) {
-    notes.splice(i, 1);
-    renderNotes();
-}
-
-// 🔥 ENTER para agregar nota
-document.getElementById("noteInput").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        addNote();
-    }
-});
-
-renderNotes();
-</script>
-
-</body>
-</html>
-[5:54 pm, 21/4/2026] L: <!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>MyTaskPro</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
 body {
     font-family: Arial;
-    background: linear-gradient(135deg, #d9f2ff, #ffffff);
+    background: #e6f7ff;
     padding: 20px;
 }
 
 .container {
-    max-width: 450px;
+    max-width: 500px;
     margin: auto;
 }
 
 .card {
     background: white;
-    border: 2px solid #90e0ef;
-    border-radius: 15px;
     padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 h2 {
@@ -202,24 +44,23 @@ input, select {
 button {
     width: 100%;
     padding: 10px;
-    margin-top: 10px;
-    background: #00b4d8;
+    margin-top: 8px;
+    background: #0096c7;
     color: white;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
 }
 
 button:hover {
-    background: #0096c7;
+    background: #0077b6;
 }
 
 li {
-    background: #f0fbff;
-    border: 1px solid #90e0ef;
-    margin-top: 10px;
+    list-style: none;
+    background: #f1fbff;
     padding: 10px;
-    border-radius: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
 }
@@ -232,7 +73,6 @@ li {
 
 <h2>📝 MyTaskPro</h2>
 
-<!-- LOGIN -->
 <div class="card" id="loginBox">
     <h3>Login</h3>
     <input id="email" placeholder="Email">
@@ -243,7 +83,6 @@ li {
     <button onclick="logout()">Salir</button>
 </div>
 
-<!-- NOTAS -->
 <div class="card" id="appBox" style="display:none;">
 
     <input id="noteInput" placeholder="Escribe una nota..." />
@@ -257,7 +96,7 @@ li {
 
     <button onclick="addNote()">Agregar</button>
 
-    <input id="search" placeholder="Buscar..." onkeyup="renderNotes()" />
+    <input id="search" placeholder="Buscar..." onkeyup="renderNotes()">
 
     <ul id="notesList"></ul>
 
@@ -266,7 +105,8 @@ li {
 </div>
 
 <script>
-/* 🔥 TU FIREBASE CONFIG */
+
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDKQ67lAq1Sswlc0SDTsEUMZkVFESTlhg8",
   authDomain: "mytaskpro-a6655.firebaseapp.com",
@@ -277,7 +117,12 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
+const db = firebase.firestore();
+
+let userId = null;
+let notes = [];
 
 /* 🔐 LOGIN */
 function register() {
@@ -296,11 +141,82 @@ function logout() {
     auth.signOut();
 }
 
-/* mostrar u ocultar app */
+/* 👤 USUARIO */
 auth.onAuthStateChanged(user => {
     if (user) {
         loginBox.style.display = "none";
         appBox.style.display = "block";
+        userId = user.uid;
+        loadNotes();
     } else {
         loginBox.style.display = "block";
-        app
+        appBox.style.display = "none";
+        userId = null;
+        notes = [];
+        renderNotes();
+    }
+});
+
+/* 📝 NOTAS */
+function addNote() {
+    let text = noteInput.value;
+    let category = category.value;
+
+    if (text.trim() !== "") {
+        db.collection("notes").add({
+            text,
+            category,
+            uid: userId,
+            createdAt: Date.now()
+        });
+
+        noteInput.value = "";
+    }
+}
+
+function loadNotes() {
+    db.collection("notes")
+    .where("uid", "==", userId)
+    .onSnapshot(snapshot => {
+        notes = [];
+        snapshot.forEach(doc => {
+            notes.push({ id: doc.id, ...doc.data() });
+        });
+        renderNotes();
+    });
+}
+
+function deleteNote(id) {
+    db.collection("notes").doc(id).delete();
+}
+
+function renderNotes() {
+    const list = document.getElementById("notesList");
+    const search = document.getElementById("search").value.toLowerCase();
+
+    list.innerHTML = "";
+
+    notes
+    .filter(n => n.text.toLowerCase().includes(search))
+    .forEach(note => {
+        list.innerHTML += `
+            <li>
+                <div>
+                    <b>[${note.category}]</b><br>
+                    ${note.text}
+                </div>
+                <button onclick="deleteNote('${note.id}')">X</button>
+            </li>
+        `;
+    });
+}
+
+/* ENTER */
+noteInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") addNote();
+});
+
+</script>
+
+</body>
+</html>
