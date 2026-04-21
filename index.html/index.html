@@ -1,39 +1,67 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Mi App de Notas</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
+<meta charset="UTF-8">
+<title>Mis Notas Pro</title>
 
-        input {
-            padding: 8px;
-            width: 200px;
-        }
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    padding: 20px;
+}
 
-        button {
-            padding: 8px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 400px;
+}
 
-        li {
-            margin-top: 10px;
-        }
-    </style>
+input, select {
+    padding: 8px;
+    margin: 5px 0;
+    width: 100%;
+}
+
+button {
+    padding: 8px;
+    width: 100%;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+li {
+    margin-top: 10px;
+    padding: 8px;
+    background: #eee;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+</style>
 </head>
 
 <body>
 
-<h2>📝 Mis notas</h2>
+<div class="card">
+
+<h2>📝 Mis Notas Pro</h2>
 
 <input id="noteInput" placeholder="Escribe una nota..." />
+
+<select id="category">
+    <option>General</option>
+    <option>Trabajo</option>
+    <option>Estudio</option>
+    <option>Personal</option>
+</select>
+
 <button onclick="addNote()">Agregar</button>
 
 <ul id="notesList"></ul>
+
+</div>
 
 <script>
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
@@ -42,11 +70,11 @@ function renderNotes() {
     const list = document.getElementById("notesList");
     list.innerHTML = "";
 
-    notes.forEach((note, index) => {
+    notes.forEach((note, i) => {
         list.innerHTML += `
             <li>
-                ${note}
-                <button onclick="deleteNote(${index})">❌</button>
+                <span>[${note.category}] ${note.text}</span>
+                <button onclick="deleteNote(${i})">X</button>
             </li>
         `;
     });
@@ -55,21 +83,21 @@ function renderNotes() {
 }
 
 function addNote() {
-    const input = document.getElementById("noteInput");
+    let text = document.getElementById("noteInput").value;
+    let category = document.getElementById("category").value;
 
-    if (input.value.trim() !== "") {
-        notes.push(input.value);
-        input.value = "";
+    if (text.trim() !== "") {
+        notes.push({ text, category });
+        document.getElementById("noteInput").value = "";
         renderNotes();
     }
 }
 
-function deleteNote(index) {
-    notes.splice(index, 1);
+function deleteNote(i) {
+    notes.splice(i, 1);
     renderNotes();
 }
 
-// cargar al inicio
 renderNotes();
 </script>
 
