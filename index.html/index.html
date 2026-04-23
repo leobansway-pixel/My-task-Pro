@@ -2,266 +2,255 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>MyTaskPro</title>
+<title>MyTaskPro AI Startup</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
 body {
     font-family: Arial;
-    background: #e6f7ff;
+    background: #eef5ff;
     padding: 20px;
-    transition: 0.3s;
-}
-
-.container {
-    max-width: 500px;
-    margin: auto;
-}
-
-.card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: 0.3s;
 }
 
 h2 {
     text-align: center;
-    color: #0077b6;
 }
 
-input, select {
-    width: 100%;
+.top {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+input {
+    flex: 1;
     padding: 10px;
-    margin-top: 8px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
 }
 
 button {
-    width: 100%;
     padding: 10px;
-    margin-top: 8px;
     background: #0096c7;
     color: white;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
 }
 
-button:hover {
-    background: #0077b6;
-}
-
-li {
-    list-style: none;
-    background: #f1fbff;
-    padding: 10px;
-    margin-top: 8px;
-    border-radius: 8px;
+.container {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
 }
 
-/* 🌙 DARK MODE */
-.dark {
-    background: #0f172a;
-    color: white;
+.column {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    min-height: 300px;
 }
 
-.dark .card {
-    background: #1e293b;
-    color: white;
+.task {
+    background: #dff3ff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    cursor: grab;
 }
 
-.dark input,
-.dark select {
-    background: #0f172a;
-    color: white;
-    border: 1px solid #334155;
+.progress {
+    margin-top: 10px;
+    background: #ccc;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
-.dark li {
-    background: #1e293b;
+.bar {
+    height: 100%;
+    width: 0%;
+    background: green;
+}
+
+.calendar {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.day {
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
 }
 </style>
 </head>
 
 <body>
 
+<h2>🧠 MyTaskPro AI Startup MVP</h2>
+
+<div class="top">
+    <input id="taskInput" placeholder="Escribe tarea...">
+    <button onclick="addTask()">➕</button>
+    <button onclick="voice()">🎤 Voz</button>
+    <button onclick="generatePlan()">🧠 IA Plan</button>
+</div>
+
+<div class="progress">
+    <div class="bar" id="bar"></div>
+</div>
+
 <div class="container">
+    <div class="column" id="todo">
+        <h3>📌 Pendiente</h3>
+    </div>
 
-<h2>📝 MyTaskPro</h2>
+    <div class="column" id="doing">
+        <h3>⚡ En progreso</h3>
+    </div>
 
-<div class="card" id="loginBox">
-    <h3>Login</h3>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Contraseña">
-
-    <button onclick="register()">Registrarse</button>
-    <button onclick="login()">Entrar</button>
-    <button onclick="logout()">Salir</button>
+    <div class="column" id="done">
+        <h3>✅ Hecho</h3>
+    </div>
 </div>
 
-<div class="card" id="appBox" style="display:none;">
+<div class="calendar">
+    <div class="day">
+        <h3>Mañana</h3>
+        <div id="morning"></div>
+    </div>
 
-    <button onclick="toggleDark()">🌙 Modo Oscuro</button>
+    <div class="day">
+        <h3>Tarde</h3>
+        <div id="afternoon"></div>
+    </div>
 
-    <input id="noteInput" placeholder="Escribe una nota..." />
-
-    <select id="category">
-        <option>General</option>
-        <option>Trabajo</option>
-        <option>Estudio</option>
-        <option>Personal</option>
-    </select>
-
-    <button onclick="addNote()">Agregar</button>
-
-    <input id="search" placeholder="Buscar..." onkeyup="renderNotes()">
-
-    <ul id="notesList"></ul>
-
-</div>
-
+    <div class="day">
+        <h3>Noche</h3>
+        <div id="night"></div>
+    </div>
 </div>
 
 <script>
 
-/* 🔥 FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyDKQ67lAq1Sswlc0SDTsEUMZkVFESTlhg8",
-  authDomain: "mytaskpro-a6655.firebaseapp.com",
-  projectId: "mytaskpro-a6655",
-  storageBucket: "mytaskpro-a6655.firebasestorage.app",
-  messagingSenderId: "87448336295",
-  appId: "1:87448336295:web:a83d96ac5ea21a9a49a882"
-};
+let tasks = [];
 
-firebase.initializeApp(firebaseConfig);
+/* ➕ TASK */
+function addTask() {
+    let text = taskInput.value;
+    if(!text) return;
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+    let div = document.createElement("div");
+    div.className = "task";
+    div.innerText = text;
 
-let userId = null;
-let notes = [];
+    document.getElementById("todo").appendChild(div);
+    tasks.push(text);
 
-/* 🔐 LOGIN */
-function register() {
-    auth.createUserWithEmailAndPassword(email.value, password.value)
-    .then(() => alert("Usuario creado"))
-    .catch(e => alert(e.message));
+    taskInput.value = "";
+    enableDrag();
+    updateProgress();
 }
 
-function login() {
-    auth.signInWithEmailAndPassword(email.value, password.value)
-    .then(() => alert("Bienvenido"))
-    .catch(e => alert(e.message));
+/* 🧲 DRAG & DROP */
+function enableDrag() {
+    document.querySelectorAll(".column").forEach(col=>{
+        new Sortable(col, {
+            group: "shared",
+            animation: 150
+        });
+    });
 }
 
-function logout() {
-    auth.signOut();
+/* 🧠 IA PLANNER REAL */
+async function generatePlan() {
+
+    const prompt = `
+Organiza estas tareas en un horario diario:
+
+${tasks.join("\n")}
+
+Devuelve SOLO JSON:
+{
+ "mañana": [],
+ "tarde": [],
+ "noche": []
+}
+`;
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer TU_API_KEY"
+        },
+        body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system", content: "Eres un planner de productividad." },
+                { role: "user", content: prompt }
+            ]
+        })
+    });
+
+    const data = await res.json();
+
+    let plan = JSON.parse(data.choices[0].message.content);
+
+    document.getElementById("morning").innerHTML = plan.mañana.map(t=>"• "+t).join("<br>");
+    document.getElementById("afternoon").innerHTML = plan.tarde.map(t=>"• "+t).join("<br>");
+    document.getElementById("night").innerHTML = plan.noche.map(t=>"• "+t).join("<br>");
+
+    notify("🧠 IA creó tu día");
 }
 
-/* 👤 USUARIO */
-auth.onAuthStateChanged(user => {
-    if (user) {
-        loginBox.style.display = "none";
-        appBox.style.display = "block";
-        userId = user.uid;
-        loadNotes();
+/* 🎤 VOZ */
+function voice() {
+    let rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    rec.lang = "es-ES";
+
+    rec.onresult = e => {
+        let text = e.results[0][0].transcript;
+
+        if(text.includes("organiza mi día")) {
+            generatePlan();
+        } else {
+            taskInput.value = text;
+            addTask();
+        }
+    };
+
+    rec.start();
+}
+
+/* 📊 PROGRESO */
+function updateProgress() {
+    let total = tasks.length;
+    let done = document.getElementById("done").children.length - 1;
+
+    let percent = total ? (done / total) * 100 : 0;
+
+    document.getElementById("bar").style.width = percent + "%";
+}
+
+/* 🔔 NOTIFICACIONES */
+function notify(msg) {
+    if(Notification.permission === "granted") {
+        new Notification(msg);
     } else {
-        loginBox.style.display = "block";
-        appBox.style.display = "none";
-        userId = null;
-        notes = [];
-        renderNotes();
-    }
-});
-
-/* 📝 NOTAS */
-function addNote() {
-    let text = noteInput.value;
-    let category = category.value;
-
-    if (text.trim() !== "") {
-        db.collection("notes").add({
-            text,
-            category,
-            uid: userId,
-            createdAt: Date.now()
-        });
-
-        noteInput.value = "";
+        Notification.requestPermission();
     }
 }
 
-function loadNotes() {
-    db.collection("notes")
-    .where("uid", "==", userId)
-    .onSnapshot(snapshot => {
-        notes = [];
-        snapshot.forEach(doc => {
-            notes.push({ id: doc.id, ...doc.data() });
-        });
-        renderNotes();
-    });
-}
+/* ⏰ ALERTAS SIMPLES */
+setInterval(()=>{
+    let h = new Date().getHours();
 
-function deleteNote(id) {
-    db.collection("notes").doc(id).delete();
-}
-
-function editNote(id, oldText) {
-    let newText = prompt("Editar nota:", oldText);
-
-    if (newText && newText.trim() !== "") {
-        db.collection("notes").doc(id).update({
-            text: newText
-        });
-    }
-}
-
-/* 🎨 RENDER */
-function renderNotes() {
-    const list = document.getElementById("notesList");
-    const search = document.getElementById("search").value.toLowerCase();
-
-    list.innerHTML = "";
-
-    notes
-    .filter(n => n.text.toLowerCase().includes(search))
-    .forEach(note => {
-        list.innerHTML += `
-            <li>
-                <div>
-                    <b>[${note.category}]</b><br>
-                    ${note.text}
-                </div>
-                <div>
-                    <button onclick="editNote('${note.id}', '${note.text}')">✏️</button>
-                    <button onclick="deleteNote('${note.id}')">X</button>
-                </div>
-            </li>
-        `;
-    });
-}
-
-/* 🌙 DARK MODE */
-function toggleDark() {
-    document.body.classList.toggle("dark");
-}
-
-/* ENTER */
-noteInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") addNote();
-});
+    if(h === 9) notify("🌅 Empieza tu día");
+    if(h === 15) notify("⚡ Revisa tus tareas");
+    if(h === 21) notify("🌙 Cierra tu día");
+}, 60000);
 
 </script>
 
